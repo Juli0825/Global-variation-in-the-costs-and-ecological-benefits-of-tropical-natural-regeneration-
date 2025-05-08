@@ -1,0 +1,2 @@
+# Global-variation-in-the-costs-and-ecological-benefits-of-tropical-natural-regeneration-
+This repo contains R scripts and resulting data layers for analysing the potential for natural tropical forest regeneration. The analysis categorises areas into 12 distinct groups based on cost levels (opportunity costs and establishment costs) and benefit combinations (carbon sequestration and biodiversity conservation).

@@ -7,7 +7,7 @@ code/: Contains all R scripts used for analysis and generating figures in the ma
 
 data/: Contains resulting raster layers
 
-**Scripts**
+**code/:scripts**
 
 *PNR_cost_benefit_categories.R*: The main analysis script that processes input rasters, extracts values, calculates costs, and creates the 12-category classification system. This script generates the primary outputs used by all other scripts. It also creates Figure 2 in the manuscript and Appendix 1.
 
@@ -19,7 +19,7 @@ data/: Contains resulting raster layers
 
 *sensitivity_median.R*: Conducts a sensitivity analysis using a different classification method for biodiversity and carbon. Instead of Jenks natural breaks, this script uses median values within each cost category to classify benefits as high or low. It creates Appendix 4.
 
-**Data Files**
+**data/:**
 
 *PNR_categories.tif*: Main raster output containing the 12 cost-benefit categories
 
@@ -29,7 +29,7 @@ data/: Contains resulting raster layers
 
 *sensitivity_opp.tif*: Raster output from the opportunity cost sensitivity analysis
 
-**Note on Data Availability**: The input datasets used in this study are not included in this repo as they are extremely large and can be downloaded from the citations provided in the manuscript. All input datasets are publicly accessible. The data uploaded here represent the main results from this study. For additional results, please refer to the manuscript and its appendices.
+***Note on Data Availability***: The input datasets used in this study are not included in this repo as they are extremely large and can be downloaded from the citations provided in the manuscript. All input datasets are publicly accessible. The data uploaded here represent the main results from this study. For additional results, please refer to the manuscript and its appendices.
 
 **Running the Code**
 

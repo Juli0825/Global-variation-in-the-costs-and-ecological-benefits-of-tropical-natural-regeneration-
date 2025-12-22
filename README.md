@@ -17,7 +17,7 @@ data/: Contains resulting raster layers
 
 *sensitivity_opportunity_cost.R*: Performs a sensitivity analysis by excluding land opportunity costs from the natural regeneration cost calculation, then recategorises areas using the same classification approach as the main analysis. It creates Appendix 3.
 
-*sensitivity_median.R*: Conducts a sensitivity analysis using a different classification method for biodiversity and carbon. Instead of Jenks natural breaks, this script uses median values within each cost category to classify benefits as high or low. It creates Appendix 4.
+*sensitivity_natural_break.R*: Conducts a sensitivity analysis using a different classification method for biodiversity and carbon. Instead of Jenks natural breaks, this script uses median values within each cost category to classify benefits as high or low. It creates Appendix 4.
 
 **data/:**
 
@@ -25,7 +25,7 @@ data/: Contains resulting raster layers
 
 *all_cat_barplot.csv*: Preprocessed data for the circular barplot, with values transformed to log10 scale
 
-*sensitivity_median.tif*: Raster output from the median-based classification sensitivity analysis
+*sensitivity_natural_break.tif*: Raster output from the Jenks natural-break-based classification sensitivity analysis
 
 *sensitivity_opp.tif*: Raster output from the opportunity cost sensitivity analysis
 
@@ -39,7 +39,7 @@ First run PNR_cost_benefit_categories.R to generate the core classification.
 
 Then run Fig3_bubble_plot.R and Fig4_circular_barplot.R.\
 
-If desired, run the sensitivity analysis scripts (sensitivity_opportunity_cost.R and sensitivity_median.R).
+If desired, run the sensitivity analysis scripts (sensitivity_opportunity_cost.R and sensitivity_natural_break.R).
 
 **Citations**
 

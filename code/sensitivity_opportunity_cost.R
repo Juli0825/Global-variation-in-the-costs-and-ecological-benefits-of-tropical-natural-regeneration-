@@ -30,7 +30,7 @@ mollweide_crs <- "+proj=moll +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_de
 # STEP 2: Calculate sensitivity analysis costs
 #----------------------------------------------------------------------
 # Only includes the saved establishment costs component
-pnr_df$sens_costs <- (1-pnr_df$PNR_score)*pnr_df$establishment
+pnr_df$sens_costs <- (1-pnr_df$PNR_score*0.6)*pnr_df$establishment/0.4
 
 #----------------------------------------------------------------------
 # STEP 3: Categorise data for sensitivity analysis
@@ -42,19 +42,23 @@ pnr_df <- pnr_df %>%
     nrcost_category = recode(nrcost_category, `1` = "Low", `2` = "Medium", `3` = "High")
   )
 
-# Calculate Jenks natural breaks for biodiversity with 2 classes
-bio_jenks <- classIntervals(pnr_df$bio, n = 2, style = "jenks")
-bio_break <- bio_jenks$brks[2]  # Middle breakpoint
+# Calculate the median biodiversity and carbon within each nrcost_category
+nrcost_medians <- pnr_df %>%
+  group_by(nrcost_category) %>%
+  summarise(
+    median_bio = median(bio, na.rm = TRUE),
+    median_carbon = median(carbon, na.rm = TRUE)
+  )
 
-# Calculate Jenks natural breaks for carbon with 2 classes
-carbon_jenks <- classIntervals(pnr_df$carbon, n = 2, style = "jenks")
-carbon_break <- carbon_jenks$brks[2]  # Middle breakpoint
+# Join the medians back to the original dataframe
+pnr_df <- pnr_df %>%
+  left_join(nrcost_medians, by = "nrcost_category")
 
-# Categorize bio and carbon into low/high based on the natural breakpoints
+# Categorise biodiversity and carbon based on the median values within each nrcost_category
 pnr_df <- pnr_df %>%
   mutate(
-    bio_category = if_else(bio <= bio_break, "Low", "High"),
-    carbon_category = if_else(carbon <= carbon_break, "Low", "High"),
+    bio_category = if_else(bio <= median_bio, "Low", "High"),
+    carbon_category = if_else(carbon <= median_carbon, "Low", "High"),
     
     # Create combined categories for bio and carbon
     nrcostsub_category = case_when(
@@ -64,7 +68,6 @@ pnr_df <- pnr_df %>%
       bio_category == "High" & carbon_category == "Low" ~ "Biodiversity High, Carbon Low"
     )
   )
-
 #----------------------------------------------------------------------
 # STEP 4: Create category codes and rasterise
 #----------------------------------------------------------------------
@@ -95,7 +98,7 @@ pnr_df$category_code <- as.integer(pnr_df$category_code)
 pnr_sf <- st_as_sf(pnr_df, coords = c("Longitude", "Latitude"), crs = mollweide_crs)
 
 # Define the raster template
-raster_template <- raster(extent(pnr_sf), resolution = 884.8194, crs = mollweide_crs)
+raster_template <- raster(extent(pnr_sf), resolution = 885.168, crs = mollweide_crs)
 
 # Rasterise the data based on the category_code field
 sens_raster <- rasterize(pnr_sf, raster_template, field = "category_code") 
@@ -199,3 +202,4 @@ write_xlsx(sens_results, "results/sensitivity_no_oppcost_statistics.xlsx")
 end_time <- Sys.time()
 cat("Finished country statistics calculation at:", as.character(end_time), "\n")
 cat("Total time:", difftime(end_time, start_time, units = "mins"), "minutes\n")
+

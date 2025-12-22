@@ -66,7 +66,7 @@ pnr_df$establishment <- raster::extract(estab_reprojected_resamp, pnr_df_coords)
 pnr_df <- na.omit(pnr_df)
 
 # Calculate cost for natural regeneration
-pnr_df$nrcosts <- ((1-pnr_df$PNR_score)*pnr_df$establishment) + pnr_df$landcosts
+pnr_df$nrcosts <- (1-pnr_df$PNR_score*0.6)*pnr_df$establishment/0.4 + pnr_df$landcosts
 
 #----------------------------------------------------------------------
 # STEP 4: Categorise data using median-based classification
@@ -229,4 +229,5 @@ for (x in 1:nrow(gadm_moll)) {
 
 # Save the results to an Excel file
 write_xlsx(developingnrc_results, "results/median_statistics.xlsx")
+
 

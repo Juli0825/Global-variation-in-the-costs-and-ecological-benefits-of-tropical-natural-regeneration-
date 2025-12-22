@@ -22,9 +22,6 @@ library(ggrepel)
 #----------------------------------------------------------------------
 # STEP 1: Load and prepare the data
 #----------------------------------------------------------------------
-# Load the cleaned CSV file
-cleaned_lmics <- read_csv("data/bubble.csv")
-
 # Calculate additional columns for analysis and visualisation
 cleaned_lmics <- cleaned_lmics %>%
   mutate(
@@ -43,7 +40,7 @@ filtered_lmics <- cleaned_lmics %>%
   filter(Category_4_km2 >= 100)
 
 #----------------------------------------------------------------------
-# STEP 2: Create the bubble plot
+# STEP 2: Create the bubble plot with legend
 #----------------------------------------------------------------------
 bubble <- ggplot(filtered_lmics, 
                  aes(x = total_km2x1000, 
@@ -51,7 +48,7 @@ bubble <- ggplot(filtered_lmics,
                      size = proportion_category_4, 
                      label = NAME_0)) +
   # Set axis limits (using log scale)
-  coord_cartesian(xlim = c(.5, 2500), ylim = c(.1, 400), clip = 'on') +
+  coord_cartesian(xlim = c(.1, 2500), ylim = c(.1, 400), clip = 'on') +
   
   # Create bubbles with dark green borders and lighter fill
   geom_point(shape = 21, 
@@ -60,11 +57,27 @@ bubble <- ggplot(filtered_lmics,
              stroke = 1.2, 
              alpha = 0.7) +
   
-  # Scale size based on area, remove legend for size
-  scale_size_area(max_size = 14, guide = "none") +
+  # Scale size based on area with custom breaks for legend
+  scale_size_area(
+    max_size = 14,
+    name = "Proportion of\nholistic hotspots (%)",
+    breaks = c(10, 50),
+    labels = c("10%", "50%"),
+    guide = guide_legend(
+      override.aes = list(
+        fill = '#008000',
+        colour = "darkgreen",
+        stroke = 1.2,
+        alpha = 0.7
+      ),
+      keywidth = 0.8,    # Make legend key width smaller
+      keyheight = 0.8,   # Make legend key height smaller
+      order = 1
+    )
+  ) +
   
   # Add country name labels
-  geom_text(size = 3, vjust = 1.5, hjust = 1) +
+  geom_text(size = 2.8, vjust = 1.3, hjust = 1.3) +
   
   # Use logarithmic scale for x-axis with appropriate breaks
   scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -82,17 +95,22 @@ bubble <- ggplot(filtered_lmics,
   
   # Set plot labels
   labs(
-    title = "Total natural regeneration potential versus holistic hotspot (countries having >100 km² holistic hotspot)",
+    title = "Total natural regeneration potential versus holistic hotspot\n(countries having >100 km² holistic hotspot)",
     x = "Total potential for natural regeneration area (km²/1000)", 
     y = "Holistic hotspot area (km²/1000)"
   ) +
   
-  # Format text elements
+  # Format text elements and adjust legend position
   theme(
-    plot.title = element_text(size = 8, face = "bold"),
-    axis.title = element_text(size = 12),
-    legend.title = element_text(size = 12),
-    legend.position = "right"
+    plot.title = element_text(size = 10, face = "bold"),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15, r = 0, b = 0, l = 0)),  # Move x-axis title down
+    axis.title.y = element_text(size = 12),
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 9),
+    legend.position = "right",
+    legend.background = element_rect(fill = "white", colour = "black"),
+    legend.key = element_rect(fill = "white"),
+    legend.key.size = unit(0.6, "cm")  # Make overall legend key size smaller
   )
 
 #----------------------------------------------------------------------
@@ -103,3 +121,4 @@ print(bubble)
 
 # Save as high-resolution PDF for further editing if needed
 ggsave("results/bubble_plot.pdf", plot = bubble, width = 8, height = 6, units = "in", dpi = 400)
+

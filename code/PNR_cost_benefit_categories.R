@@ -35,13 +35,13 @@ pnr_df_coords <- pnr_df[, 1:2]
 # STEP 2: Process benefits variables (carbon and biodiversity)
 #----------------------------------------------------------------------
 # Process carbon sequestration data
-carbon_raster <- raster("data/Benefits/Cook_Patton_Carbon/sequestration_rate__mean__aboveground__full_extent__Mg_C_ha_yr.tif")
+carbon_raster <- raster("data/Benefits/Robinson_Carbon/total_carbon_30yr.tif")
 carbon_raster_reprojected <- projectRaster(carbon_raster, crs = mollweide_crs, method = 'ngb')
 carbon_raster_resamp <- resample(carbon_raster_reprojected, pnr_raster, method = 'bilinear')
 pnr_df$carbon <- raster::extract(carbon_raster_resamp, pnr_df_coords)
 
 # Process biodiversity data
-bio_raster <- raster("data/Benefits/Combined_THR_SR_2024/Combined_THR_SR_2024.tif")
+bio_raster <- raster("data/Benefits/Species_extinction_risk_layers/for_pixel_extinction_risk_reduction.tif")
 bio_rast_reprojected <- projectRaster(bio_raster, crs = mollweide_crs, method = 'ngb')
 bio_raster_resamp <- resample(bio_rast_reprojected, pnr_raster, method = 'bilinear')
 pnr_df$bio <- raster::extract(bio_raster_resamp, pnr_df_coords)
@@ -69,37 +69,34 @@ pnr_df <- na.omit(pnr_df)
 pnr_df$nrcosts <- ((1-pnr_df$PNR_score)*pnr_df$establishment) + pnr_df$landcosts
 
 #----------------------------------------------------------------------
-# STEP 4: Calculate natural breaks for biodiversity and carbon
+# STEP 4: Categorise data using median-based classification
 #----------------------------------------------------------------------
-# Calculate Jenks natural breaks for biodiversity with 2 classes
-bio_jenks <- classIntervals(pnr_df$bio, n = 2, style = "jenks")
-bio_break <- bio_jenks$brks[2]  # Middle breakpoint
-
-# Calculate Jenks natural breaks for carbon with 2 classes
-carbon_jenks <- classIntervals(pnr_df$carbon, n = 2, style = "jenks")
-carbon_break <- carbon_jenks$brks[2]  # Middle breakpoint
-
-# Save the break values for reference
-cat("Biodiversity break value:", bio_break, "\n")
-cat("Carbon break value:", carbon_break, "\n")
-
-#----------------------------------------------------------------------
-# STEP 5: Categorise data based on costs, biodiversity, and carbon
-#----------------------------------------------------------------------
-# Divide nrcost into 3 categories using quantiles (Low, Medium, High)
+# Divide nrcosts into 3 quantile-based categories (Low, Medium, High)
 pnr_df <- pnr_df %>%
   mutate(
-    nrcost_category = ntile(nrcosts, 3),
+    nrcost_category = ntile(nrcosts, 3),  # Create 3 quantile bins
     nrcost_category = recode(nrcost_category, `1` = "Low", `2` = "Medium", `3` = "High")
   )
 
-# Categorise biodiversity and carbon into low/high
+# Calculate the median biodiversity and carbon within each nrcost_category
+nrcost_medians <- pnr_df %>%
+  group_by(nrcost_category) %>%
+  summarise(
+    median_bio = median(bio, na.rm = TRUE),
+    median_carbon = median(carbon, na.rm = TRUE)
+  )
+
+# Join the medians back to the original dataframe
+pnr_df <- pnr_df %>%
+  left_join(nrcost_medians, by = "nrcost_category")
+
+# Categorise biodiversity and carbon based on the median values within each nrcost_category
 pnr_df <- pnr_df %>%
   mutate(
-    bio_category = if_else(bio <= bio_break, "Low", "High"),
-    carbon_category = if_else(carbon <= carbon_break, "Low", "High"),
+    bio_category = if_else(bio <= median_bio, "Low", "High"),
+    carbon_category = if_else(carbon <= median_carbon, "Low", "High"),
     
-    # Create combined categories
+    # Create combined categories for bio and carbon
     nrcostsub_category = case_when(
       bio_category == "Low" & carbon_category == "Low" ~ "Both Low",
       bio_category == "High" & carbon_category == "High" ~ "Both High",
@@ -107,7 +104,6 @@ pnr_df <- pnr_df %>%
       bio_category == "High" & carbon_category == "Low" ~ "Biodiversity High, Carbon Low"
     )
   )
-
 # Define numeric codes for each combination
 pnr_df <- pnr_df %>%
   mutate(
@@ -138,7 +134,7 @@ pnr_df$category_code <- as.integer(pnr_df$category_code)
 pnr_sf <- st_as_sf(pnr_df, coords = c("Longitude", "Latitude"), crs = mollweide_crs)
 
 # Define the raster template
-raster_template <- raster(extent(pnr_sf), resolution = 884.8194, crs = mollweide_crs)
+raster_template <- raster(extent(pnr_sf), resolution = 885.168, crs = mollweide_crs)
 
 # Rasterise the data based on the category_code field
 cnr_raster <- rasterize(pnr_sf, raster_template, field = "category_code") 
@@ -147,7 +143,7 @@ cnr_raster <- rasterize(pnr_sf, raster_template, field = "category_code")
 cnr_raster <- calc(cnr_raster, fun = function(x) { as.integer(x) })
 
 # Save the raster as a TIFF file
-writeRaster(cnr_raster, filename = "results/new_cnr_natubreaks.tif", 
+writeRaster(cnr_raster, filename = "results/pnr_categories.tif", 
             format = "GTiff", datatype = "INT1U", overwrite = TRUE)
 
 #----------------------------------------------------------------------
@@ -232,4 +228,5 @@ for (x in 1:nrow(gadm_moll)) {
 }
 
 # Save the results to an Excel file
-write_xlsx(developingnrc_results, "results/natural_breaks_statistics.xlsx")
+write_xlsx(developingnrc_results, "results/median_statistics.xlsx")
+

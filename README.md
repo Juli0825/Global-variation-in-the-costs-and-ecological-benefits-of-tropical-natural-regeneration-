@@ -33,6 +33,7 @@ data/: Contains resulting raster layers
 
 **System requirements**
 **Software**
+
 R ≥ 4.3.3
 
 Tested on:
@@ -54,6 +55,7 @@ No non-standard hardware required. Full global analysis requires substantial mem
 **Running the Code**
 
 The main workflow is:
+
 -Download all required global input datasets listed in the manuscript.
 
 -Update file paths in PNR_cost_benefit_categories.R

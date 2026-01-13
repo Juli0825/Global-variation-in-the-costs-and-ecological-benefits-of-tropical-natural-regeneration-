@@ -37,7 +37,9 @@ data/: Contains resulting raster layers
 R ≥ 4.3.3
 
 Tested on:
-Windows Server 2019 Standard
+
+Windows Server 2019 Standard; 
+
 Windows 10 / 11
 
 **Hardware**

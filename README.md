@@ -1,5 +1,5 @@
 # Global-variation-in-the-costs-and-ecological-benefits-of-tropical-natural-regeneration-
-This repo contains the code used to analyse and map the spatial patterns of  cost and ecological benefits of natural tropical forest regeneration. The analysis categorises areas into 12 distinct groups based on cost levels and benefit combinations.
+This repo contains the R code used to analyse and map the spatial patterns of costs and ecological benefits of tropical natural forest regeneration. The analysis classifies areas into **12 cost–benefit categories** based on cost levels and benefit combinations.
 
 **Repository Structure**
 
@@ -9,15 +9,15 @@ data/: Contains resulting raster layers
 
 **code/:scripts**
 
-*PNR_cost_benefit_categories.R*: The main analysis script that processes input rasters, extracts values, calculates costs, and creates the 12-category classification system. This script generates the primary outputs used by all other scripts. It also creates Figure 2 in the manuscript and Appendix 1.
+*PNR_cost_benefit_categories.R*: The main analysis script that processes input rasters, extracts values, calculates costs, and creates the 12-category classification system. This script generates the primary outputs used by all other scripts. Produces **Figure 2** and **Appendix 1**.
 
-*Fig3_bubble_plot.R*: Creates a bubble plot comparing total natural regeneration potential against holistic hotspot area (Category 4) across countries. It creates Figure 3 in the manuscript.
+*Fig3_bubble_plot.R*: Creates a bubble plot comparing total natural regeneration potential against holistic hotspot area (Category 4) across countries. Produces **Figure 3**.
 
-*Fig4_circular_barplot.R*: Generates a circular barplot showing the distribution of all 12 categories across countries, organised by tropical realms (Neotropics, Afrotropics, and Indomalayan tropics). It creates Figure 4 in the manuscript.
+*Fig4_circular_barplot.R*: Generates a circular barplot showing the distribution of all 12 categories across countries, organised by tropical realms (Neotropics, Afrotropics, and Indomalayan tropics). Produces **Figure 4**.
 
-*sensitivity_opportunity_cost.R*: Performs a sensitivity analysis by excluding land opportunity costs from the natural regeneration cost calculation, then recategorises areas using the same classification approach as the main analysis. It creates Appendix 3.
+*sensitivity_opportunity_cost.R*: Performs a sensitivity analysis by excluding land opportunity costs from the natural regeneration cost calculation, then recategorises areas using the same classification approach as the main analysis. Produces **Appendix 3**.
 
-*sensitivity_natural_break.R*: Conducts a sensitivity analysis using a different classification method for biodiversity and carbon. Instead of Jenks natural breaks, this script uses median values within each cost category to classify benefits as high or low. It creates Appendix 4.
+*sensitivity_natural_break.R*: Conducts a sensitivity analysis using a different classification method for biodiversity and carbon. Instead of Jenks natural breaks, this script uses median values within each cost category to classify benefits as high or low. Produces **Appendix 4**.
 
 **data/:**
 
@@ -31,15 +31,44 @@ data/: Contains resulting raster layers
 
 ***Note on Data Availability***: The input datasets used in this study are not included in this repo as they are extremely large and can be downloaded from the citations provided in the manuscript. All input datasets are publicly accessible. The data uploaded here represent the main results from this study. For additional results, please refer to the manuscript and its appendices.
 
+**System requirements**
+**Software**
+R ≥ 4.3.3
+
+Tested on:
+Windows Server 2019 Standard
+Windows 10 / 11
+
+**Hardware**
+
+No non-standard hardware required. Full global analysis requires substantial memory and disk space due to large raster inputs. Demo and figure reproduction can be run on a standard desktop or laptop.
+
+**Installation**
+
+-Install R from https://cran.r-project.org
+
+-Install required packages, for example: *install.packages(c("terra", "sf", "dplyr", "ggplot2", "classInt"))*
+
+-Typical installation time: 5–10 minutes on a normal desktop computer (excluding package downloads).
+
 **Running the Code**
 
 The main workflow is:
+-Download all required global input datasets listed in the manuscript.
 
-First run PNR_cost_benefit_categories.R to generate the core classification.
+-Update file paths in PNR_cost_benefit_categories.R
 
-Then run Fig3_bubble_plot.R and Fig4_circular_barplot.R.\
+-First run PNR_cost_benefit_categories.R to generate the core classification.
 
-If desired, run the sensitivity analysis scripts (sensitivity_opportunity_cost.R and sensitivity_natural_break.R).
+-Then run Fig3_bubble_plot.R and Fig4_circular_barplot.R.\
+
+-If desired, run the sensitivity analysis scripts (sensitivity_opportunity_cost.R and sensitivity_natural_break.R).
+
+**Expected runtime**
+
+Full global analysis: several hours (~6hrs) depending on hardware and storage performance.
+
+Sensitivity analyses: additional runtime of similar magnitude.
 
 **Citations**
 
